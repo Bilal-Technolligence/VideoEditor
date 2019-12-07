@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private  int startTime,endTime;
     private  double pieces;
     private  int input=2;
+    int i =1;
     private Context mContext;
     private String[] lastReverseCommand;
 
@@ -105,21 +107,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 choice = 2;
+                i=1;
                 pieces=duration/input;
                 startTime=0;
                 endTime=(int)pieces;
-                for (int i = 1; i <=input+1; i++) {
 
                     if (selectedVideoUri != null) {
 
                         Snackbar.make(mainlayout, ""+i, 4000).show();
                         executeCutVideoCommand(i,startTime, endTime);
-                        startTime=endTime;
-                        endTime=endTime+(int)pieces;
+
                     }
-                    else
-                        Snackbar.make(mainlayout, "Please upload a video", 4000).show();
-                }
+
+                    else {
+                        Snackbar.make( mainlayout, "Please upload a video", 4000 ).show();
+                    }
+
+                   
+
+
             }
         });
 
@@ -342,7 +348,11 @@ public class MainActivity extends AppCompatActivity {
 
         execFFmpegBinary(complexCommand);
 
+
+
     }
+
+
 
     /**
      * Executing ffmpeg binary
@@ -355,9 +365,22 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "FAILED with output : " + s);
                 }
 
+                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                 @Override
                 public void onSuccess(String s) {
                     Log.d(TAG, "SUCCESS with output : " + s);
+                    Toast.makeText( MainActivity.this, i+"Video Trimed successfully", Toast.LENGTH_SHORT ).show();
+                    i++;
+
+                    if(i<=input){
+                        agincut();
+
+                    }
+                    else {
+                        progressDialog.dismiss();
+                    }
+
+
 //                    if (choice == 2) {
 //                        Intent intent = new Intent(MainActivity.this, PreviewActivity.class);
 //                        intent.putExtra(FILEPATH, filePath);
@@ -389,9 +412,10 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFinish() {
                     Log.d(TAG, "Finished command : ffmpeg " + command);
-                    if (choice != 8 && choice != 9 && choice != 10) {
-                        progressDialog.dismiss();
-                    }
+//                    if (i==input) {
+//                        progressDialog.dismiss();
+//                    }
+
 
                 }
             });
@@ -535,5 +559,15 @@ public class MainActivity extends AppCompatActivity {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void agincut() {
+            startTime = endTime;
+            endTime = endTime + (int) pieces;
+            Snackbar.make( mainlayout, "" + i, 4000 ).show();
+            executeCutVideoCommand( i, startTime, endTime );
+
+
+
+    }
 
 }
