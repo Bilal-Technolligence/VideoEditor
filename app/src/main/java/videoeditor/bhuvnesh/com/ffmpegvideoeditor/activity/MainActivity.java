@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private int duration;
     private  int startTime,endTime;
     private  double pieces;
-    private  int input=2;
+    private  int input=4; //input
     private Context mContext;
     private String[] lastReverseCommand;
 
@@ -108,17 +108,21 @@ public class MainActivity extends AppCompatActivity {
                 pieces=duration/input;
                 startTime=0;
                 endTime=(int)pieces;
-                for (int i = 1; i <=input+1; i++) {
+                for (int i = 1; i <=input; i++) {
 
                     if (selectedVideoUri != null) {
 
                         Snackbar.make(mainlayout, ""+i, 4000).show();
+
                         executeCutVideoCommand(i,startTime, endTime);
-                        startTime=endTime;
-                        endTime=endTime+(int)pieces;
+
                     }
-                    else
+                    else {
                         Snackbar.make(mainlayout, "Please upload a video", 4000).show();
+                    }
+
+                    startTime=endTime;
+                    endTime=endTime+(int)pieces;
                 }
             }
         });
@@ -376,7 +380,9 @@ public class MainActivity extends AppCompatActivity {
                         progressDialog.setMessage("progress : concatenating reversed videos " + s);
                     else
                         progressDialog.setMessage("progress : " + s);
+
                     Log.d(TAG, "progress : " + s);
+
                 }
 
                 @Override
