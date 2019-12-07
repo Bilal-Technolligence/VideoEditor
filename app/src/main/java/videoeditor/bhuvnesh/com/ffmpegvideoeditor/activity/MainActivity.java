@@ -61,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvLeft, tvRight;
     private String filePath;
     private int duration;
+    private  int startTime,endTime;
+    private  double pieces;
+    private  int input=2;
     private Context mContext;
     private String[] lastReverseCommand;
 
@@ -101,13 +104,22 @@ public class MainActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
-
                 choice = 2;
+                pieces=duration/input;
+                startTime=0;
+                endTime=(int)pieces;
+                for (int i = 1; i <=input+1; i++) {
 
-                if (selectedVideoUri != null) {
-                    executeCutVideoCommand(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
-                } else
-                    Snackbar.make(mainlayout, "Please upload a video", 4000).show();
+                    if (selectedVideoUri != null) {
+
+                        Snackbar.make(mainlayout, ""+i, 4000).show();
+                        executeCutVideoCommand(i,startTime, endTime);
+                        startTime=endTime;
+                        endTime=endTime+(int)pieces;
+                    }
+                    else
+                        Snackbar.make(mainlayout, "Please upload a video", 4000).show();
+                }
             }
         });
 
@@ -305,12 +317,12 @@ public class MainActivity extends AppCompatActivity {
      * Command for cutting video
      */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void executeCutVideoCommand(int startMs, int endMs) {
+    private void executeCutVideoCommand(int i,int startMs, int endMs) {
         File moviesDir = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_MOVIES
         );
 
-        String filePrefix = "cut_video";
+        String filePrefix = "cut_video"+i;
         String fileExtn = ".mp4";
         String yourRealPath = getPath(MainActivity.this, selectedVideoUri);
         File dest = new File(moviesDir, filePrefix + fileExtn);
@@ -326,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "startTrim: endMs: " + endMs);
         filePath = dest.getAbsolutePath();
         //String[] complexCommand = {"-i", yourRealPath, "-ss", "" + startMs / 1000, "-t", "" + endMs / 1000, dest.getAbsolutePath()};
-        String[] complexCommand = {"-ss", "" + startMs / 1000, "-y", "-i", yourRealPath, "-t", "" + (endMs - startMs) / 1000,"-vcodec", "mpeg4", "-b:v", "2097152", "-b:a", "48000", "-ac", "2", "-ar", "22050", filePath};
+        String[] complexCommand = {"-ss", "" + startMs, "-y", "-i", yourRealPath, "-t", "" + (endMs - startMs) ,"-vcodec", "mpeg4", "-b:v", "2097152", "-b:a", "48000", "-ac", "2", "-ar", "22050", filePath};
 
         execFFmpegBinary(complexCommand);
 
@@ -346,11 +358,11 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String s) {
                     Log.d(TAG, "SUCCESS with output : " + s);
-                    if (choice == 2) {
-                        Intent intent = new Intent(MainActivity.this, PreviewActivity.class);
-                        intent.putExtra(FILEPATH, filePath);
-                        startActivity(intent);
-                    }
+//                    if (choice == 2) {
+//                        Intent intent = new Intent(MainActivity.this, PreviewActivity.class);
+//                        intent.putExtra(FILEPATH, filePath);
+//                        startActivity(intent);
+//                    }
                 }
 
                 @Override
