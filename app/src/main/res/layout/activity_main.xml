@@ -25,15 +25,15 @@
             android:layout_marginTop="@dimen/dp5" />
 
 
-<!--        <org.florescu.android.rangeseekbar.RangeSeekBar-->
-<!--            android:id="@+id/rangeSeekBar"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_below="@+id/videoView"-->
-<!--            android:layout_marginTop="@dimen/dp5"-->
-<!--            app:showLabels="false"-->
-<!--            rsb:activeColor="#ED1C24"-->
-<!--            rsb:textAboveThumbsColor="#000000" />-->
+        <org.florescu.android.rangeseekbar.RangeSeekBar
+            android:id="@+id/rangeSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/videoView"
+            android:layout_marginTop="@dimen/dp5"
+            app:showLabels="false"
+            rsb:activeColor="#ED1C24"
+            rsb:textAboveThumbsColor="#000000" />
 
 
         <TextView
