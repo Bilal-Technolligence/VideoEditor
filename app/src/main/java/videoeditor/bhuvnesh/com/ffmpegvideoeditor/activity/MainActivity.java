@@ -21,8 +21,12 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.MediaController;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private VideoView videoView;
     private RangeSeekBar rangeSeekBar;
     private Runnable r;
+    String videoName,videoTitle;
     private FFmpeg ffmpeg;
     private ProgressDialog progressDialog;
     private Uri selectedVideoUri;
@@ -64,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
     private int duration;
     private  int startTime,endTime;
     private  double pieces;
-    private  int input=2;
+    EditText txtinput;
+    private int input;
+    String  inputt;
     int i =1;
     private Context mContext;
     private String[] lastReverseCommand;
@@ -81,10 +88,11 @@ public class MainActivity extends AppCompatActivity {
 
         tvLeft = (TextView) findViewById(R.id.tvLeft);
         tvRight = (TextView) findViewById(R.id.tvRight);
+        txtinput = (EditText)findViewById( R.id.txtInput );
 
         videoView = (VideoView) findViewById(R.id.videoView);
         rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeSeekBar);
-        mainlayout = (ScrollView) findViewById(R.id.mainlayout);
+    //        mainlayout = (ScrollView) findViewById(R.id.mainlayout);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(null);
         progressDialog.setCancelable(false);
@@ -101,29 +109,40 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
         cutVideo.setOnClickListener(new View.OnClickListener() {
+
+
+
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
-                choice = 2;
-                i=1;
-                pieces=duration/input;
-                startTime=0;
-                endTime=(int)pieces;
+
+                inputt= txtinput.getText().toString() ;
+                if(inputt.isEmpty())
+                {
+                    txtinput.setError( "Please enter the Number" );
+                }
+                else {
+
+                    input = Integer.parseInt( inputt );
+
+
+                    choice = 2;
+                    i = 1;
+                    pieces = duration / input;
+                    startTime = 0;
+                    endTime = (int) pieces;
 
                     if (selectedVideoUri != null) {
 
-                        Snackbar.make(mainlayout, ""+i, 4000).show();
-                        executeCutVideoCommand(i,startTime, endTime);
+                        Snackbar.make( mainlayout, "" + i, 4000 ).show();
+                        executeCutVideoCommand( i, startTime, endTime );
 
-                    }
-
-                    else {
+                    } else {
                         Snackbar.make( mainlayout, "Please upload a video", 4000 ).show();
                     }
 
-                   
+                }
 
 
             }
@@ -218,6 +237,12 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == REQUEST_TAKE_GALLERY_VIDEO) {
                 selectedVideoUri = data.getData();
                 videoView.setVideoURI(selectedVideoUri);
+                //control of video view
+                MediaController mediaController= new MediaController(this);
+                videoView.setVideoURI(selectedVideoUri);
+                videoView.setMediaController(mediaController);
+                //anchor set
+                mediaController.setAnchorView(videoView);
                 videoView.start();
 
 
@@ -228,6 +253,17 @@ public class MainActivity extends AppCompatActivity {
                         // TODO Auto-generated method stub
                         duration = mp.getDuration() / 1000;
                         tvLeft.setText("00:00:00");
+
+                        Cursor cursor = getContentResolver().query(selectedVideoUri, null, null, null, null);
+                        /*
+                         * Get the column indexes of the data in the Cursor,
+                         * move to the first row in the Cursor, get the data,
+                         * and display it.
+                         */
+                        int nameIndex = cursor.getColumnIndex( OpenableColumns.DISPLAY_NAME);
+                        cursor.moveToFirst();
+                        videoName=cursor.getString(nameIndex);
+                        videoTitle = videoName.split("\\.")[0];
 
                         tvRight.setText(getTime(mp.getDuration() / 1000));
                         mp.setLooping(true);
@@ -328,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                 Environment.DIRECTORY_MOVIES
         );
 
-        String filePrefix = "cut_video"+i;
+        String filePrefix = videoTitle+" Part "+i;
         String fileExtn = ".mp4";
         String yourRealPath = getPath(MainActivity.this, selectedVideoUri);
         File dest = new File(moviesDir, filePrefix + fileExtn);
