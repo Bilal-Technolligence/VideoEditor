@@ -25,6 +25,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.MediaController;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,7 +38,7 @@ import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 
-//import org.florescu.android.rangeseekbar.RangeSeekBar;
+import org.florescu.android.rangeseekbar.RangeSeekBar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,8 +52,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_TAKE_GALLERY_VIDEO = 100;
     private VideoView videoView;
-  //  private RangeSeekBar rangeSeekBar;
+    private RangeSeekBar rangeSeekBar;
     private Runnable r;
+    String videoName,videoTitle;
     private FFmpeg ffmpeg;
     private ProgressDialog progressDialog;
     private Uri selectedVideoUri;
@@ -64,10 +67,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvLeft, tvRight;
     private String filePath;
     private int duration;
-    private String videoTitle,videoName;
     private  int startTime,endTime;
     private  double pieces;
-    private  int input=2;
+    EditText txtinput;
+    private int input;
+    String  inputt;
     int i =1;
     private Context mContext;
     private String[] lastReverseCommand;
@@ -84,14 +88,15 @@ public class MainActivity extends AppCompatActivity {
 
         tvLeft = (TextView) findViewById(R.id.tvLeft);
         tvRight = (TextView) findViewById(R.id.tvRight);
+        txtinput = (EditText)findViewById( R.id.txtInput );
 
         videoView = (VideoView) findViewById(R.id.videoView);
-       // rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeSeekBar);
-        mainlayout = (ScrollView) findViewById(R.id.mainlayout);
+        rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeSeekBar);
+    //        mainlayout = (ScrollView) findViewById(R.id.mainlayout);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(null);
         progressDialog.setCancelable(false);
-        //rangeSeekBar.setEnabled(false);
+        rangeSeekBar.setEnabled(false);
         loadFFMpegBinary();
 
         uploadVideo.setOnClickListener(new View.OnClickListener() {
@@ -104,29 +109,40 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
         cutVideo.setOnClickListener(new View.OnClickListener() {
+
+
+
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
-                choice = 2;
-                i=1;
-                pieces=duration/input;
-                startTime=0;
-                endTime=(int)pieces;
+
+                inputt= txtinput.getText().toString() ;
+                if(inputt.isEmpty())
+                {
+                    txtinput.setError( "Please enter the Number" );
+                }
+                else {
+
+                    input = Integer.parseInt( inputt );
+
+
+                    choice = 2;
+                    i = 1;
+                    pieces = duration / input;
+                    startTime = 0;
+                    endTime = (int) pieces;
 
                     if (selectedVideoUri != null) {
 
-                        Snackbar.make(mainlayout, ""+i, 4000).show();
-                        executeCutVideoCommand(i,startTime, endTime);
+                        Snackbar.make( mainlayout, "" + i, 4000 ).show();
+                        executeCutVideoCommand( i, startTime, endTime );
 
-                    }
-
-                    else {
+                    } else {
                         Snackbar.make( mainlayout, "Please upload a video", 4000 ).show();
                     }
 
-                   
+                }
 
 
             }
@@ -215,12 +231,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_TAKE_GALLERY_VIDEO) {
                 selectedVideoUri = data.getData();
                 videoView.setVideoURI(selectedVideoUri);
+                //control of video view
+                MediaController mediaController= new MediaController(this);
+                videoView.setVideoURI(selectedVideoUri);
+                videoView.setMediaController(mediaController);
+                //anchor set
+                mediaController.setAnchorView(videoView);
                 videoView.start();
 
 
@@ -230,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onPrepared(MediaPlayer mp) {
                         // TODO Auto-generated method stub
                         duration = mp.getDuration() / 1000;
+                        tvLeft.setText("00:00:00");
 
                         Cursor cursor = getContentResolver().query(selectedVideoUri, null, null, null, null);
                         /*
@@ -237,45 +260,40 @@ public class MainActivity extends AppCompatActivity {
                          * move to the first row in the Cursor, get the data,
                          * and display it.
                          */
-                        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        int nameIndex = cursor.getColumnIndex( OpenableColumns.DISPLAY_NAME);
                         cursor.moveToFirst();
                         videoName=cursor.getString(nameIndex);
                         videoTitle = videoName.split("\\.")[0];
 
-
-
-
-                        tvLeft.setText("00:00:00");
-
                         tvRight.setText(getTime(mp.getDuration() / 1000));
                         mp.setLooping(true);
-//                        rangeSeekBar.setRangeValues(0, duration);
-//                        rangeSeekBar.setSelectedMinValue(0);
-//                        rangeSeekBar.setSelectedMaxValue(duration);
-//                        rangeSeekBar.setEnabled(true);
+                        rangeSeekBar.setRangeValues(0, duration);
+                        rangeSeekBar.setSelectedMinValue(0);
+                        rangeSeekBar.setSelectedMaxValue(duration);
+                        rangeSeekBar.setEnabled(true);
 
-//                        rangeSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener() {
-//                            @Override
-//                            public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Object minValue, Object maxValue) {
-//                                videoView.seekTo((int) minValue * 1000);
-//
-//                                tvLeft.setText(getTime((int) bar.getSelectedMinValue()));
-//
-//                                tvRight.setText(getTime((int) bar.getSelectedMaxValue()));
-//
-//                            }
-//                        });
-//
-//                        final Handler handler = new Handler();
-//                        handler.postDelayed(r = new Runnable() {
-//                            @Override
-//                            public void run() {
-//
-//                                if (videoView.getCurrentPosition() >= rangeSeekBar.getSelectedMaxValue().intValue() * 1000)
-//                                    videoView.seekTo(rangeSeekBar.getSelectedMinValue().intValue() * 1000);
-//                                handler.postDelayed(r, 1000);
-//                            }
-//                        }, 1000);
+                        rangeSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener() {
+                            @Override
+                            public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Object minValue, Object maxValue) {
+                                videoView.seekTo((int) minValue * 1000);
+
+                                tvLeft.setText(getTime((int) bar.getSelectedMinValue()));
+
+                                tvRight.setText(getTime((int) bar.getSelectedMaxValue()));
+
+                            }
+                        });
+
+                        final Handler handler = new Handler();
+                        handler.postDelayed(r = new Runnable() {
+                            @Override
+                            public void run() {
+
+                                if (videoView.getCurrentPosition() >= rangeSeekBar.getSelectedMaxValue().intValue() * 1000)
+                                    videoView.seekTo(rangeSeekBar.getSelectedMinValue().intValue() * 1000);
+                                handler.postDelayed(r, 1000);
+                            }
+                        }, 1000);
 
                     }
                 });
@@ -346,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                 Environment.DIRECTORY_MOVIES
         );
 
-        String filePrefix = videoTitle+" part "+i;
+        String filePrefix = videoTitle+" Part "+i;
         String fileExtn = ".mp4";
         String yourRealPath = getPath(MainActivity.this, selectedVideoUri);
         File dest = new File(moviesDir, filePrefix + fileExtn);
@@ -541,9 +559,7 @@ public class MainActivity extends AppCompatActivity {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
                     null);
             if (cursor != null && cursor.moveToFirst()) {
-
                 final int column_index = cursor.getColumnIndexOrThrow(column);
-
                 return cursor.getString(column_index);
             }
         } finally {
