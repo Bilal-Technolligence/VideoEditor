@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String FILEPATH = "filepath";
     private int choice = 0;
     private int stopPosition;
-    private ScrollView mainlayout;
+    private RelativeLayout mainlayout;
     private TextView tvLeft, tvRight;
     private String filePath;
     private int duration;
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
         videoView = (VideoView) findViewById(R.id.videoView);
         rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeSeekBar);
-    //        mainlayout = (ScrollView) findViewById(R.id.mainlayout);
+        mainlayout = (RelativeLayout) findViewById(R.id.mainlayout);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(null);
         progressDialog.setCancelable(false);
@@ -434,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
                     else if (choice == 10)
                         progressDialog.setMessage("progress : concatenating reversed videos " + s);
                     else
-                        progressDialog.setMessage("progress : " + s);
+                        progressDialog.setMessage("please wait.... part "+i+" is splitting");
                     Log.d(TAG, "progress : " + s);
                 }
 
