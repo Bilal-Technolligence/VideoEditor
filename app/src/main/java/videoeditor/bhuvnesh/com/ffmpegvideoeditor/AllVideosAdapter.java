@@ -22,9 +22,11 @@ public class AllVideosAdapter extends RecyclerView.Adapter<AllVideosAdapter.View
     Activity activity;
     ArrayList<String> videoUri;
     ArrayList<String> videoThum;
+    ArrayList<String> videoTitle;
     Bitmap bmThumbnail;
-    public AllVideosAdapter(ArrayList<String> videoUri, ArrayList<String> videoThum) {
+    public AllVideosAdapter(ArrayList<String> videoUri, ArrayList<String> videoThum, ArrayList<String> videoTitle) {
                 this.videoUri=videoUri;
+                this.videoTitle=videoTitle;
                 this.videoThum=videoThum;
 
     }
@@ -38,7 +40,7 @@ public class AllVideosAdapter extends RecyclerView.Adapter<AllVideosAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.textView.setText(videoUri.get(position));
+        holder.textView.setText(videoTitle.get(position));
         //holder.imageView.setImageBitmap(videoThum.get(position));
 
         //testing
@@ -49,7 +51,7 @@ public class AllVideosAdapter extends RecyclerView.Adapter<AllVideosAdapter.View
 
     @Override
     public int getItemCount() {
-        return videoUri.size();
+        return videoTitle.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
